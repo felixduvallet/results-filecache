@@ -49,4 +49,4 @@ program, or call it repeatedly on the same input across different runs.
 
 ## More usage
 
-See example.py.
+See [example.py](results_filecache/example.py).
