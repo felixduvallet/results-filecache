@@ -1,4 +1,5 @@
 # results-filecache
+[![Build Status](https://travis-ci.org/felixduvallet/results-filecache.svg?branch=master)](https://travis-ci.org/felixduvallet/results-filecache)
 
 A python decorator for caching the output of a long computation, 
 conditioned on a matching md5 hash.
