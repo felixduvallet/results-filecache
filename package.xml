@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package>
+  <name>results_cache</name>
+  <version>0.0.0</version>
+  <description>A python decorator for caching computations to file.</description>
+  <url>https://github.com/felixduvallet/results-filecache</url>
+  <maintainer email="felixd@gmail.com">Felix Duvallet</maintainer>
+  <author email="felixd@gmail.com">Felix Duvallet</author>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+</package>

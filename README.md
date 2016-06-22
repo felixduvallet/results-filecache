@@ -42,12 +42,22 @@ def process(x):
 
 data = process(x)  # This will do the processing work and stores data.
 data = process(x)  # This time, the data will be loaded from file. 
-
 ```
+
+Obviously, update the `expected_md5` once you actually know what the
+result should be (run md5sum on the cache file).
 
 Note that you can either call `process()` several times in the same
 program, or call it repeatedly on the same input across different runs.
 
-## More usage
+## More usage examples
 
-See [example.py](results_filecache/example.py).
+See [example.py](results_filecache/example.py) for two ways of wrapping 
+your processing code.
+
+## Usage in ROS
+
+To facilitate dependency tracking in ROS, this python module is provided
+as a ROS package. This is simply to integrate into ROS's build system;
+none of the code actually depends on ROS.
+
