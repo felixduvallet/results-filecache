@@ -1,3 +1,4 @@
+import functools
 import unittest
 import os
 import shutil
@@ -7,7 +8,6 @@ from results_filecache import results_cache
 
 
 class TestResultsCache(unittest.TestCase):
-
     def setUp(self):
         self.ref_md5 = '932e32598553b0db91af1196443a67fa'
         self.filepath = os.path.join(os.path.dirname(__file__), 'file.pck')
@@ -15,6 +15,16 @@ class TestResultsCache(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)
+
+    class C(object):
+        # Helper class for wrapping func().
+        def __init__(self, ref):
+            self.num_calls = 0
+            self.ref = ref
+
+        def func(self):
+            self.num_calls += 1
+            return self.ref
 
     def test_compute_hash(self):
         ret = results_cache._compute_file_md5(self.filepath)
@@ -52,10 +62,44 @@ class TestResultsCache(unittest.TestCase):
         ret = results_cache._save(data, filename)
         self.assertFalse(ret)
 
-    def test_cache(self):
+    def test_uncached_class(self):
+        # Define a class with a function, call it a few times to make sure we
+        # are incrementing the num_calls counter.
 
-        pass
+        ref = 'Hello, World!'
 
+        c = self.C(ref)
+        self.assertEqual(0,  c.num_calls)
+
+        ret = c.func()
+        self.assertEqual(1, c.num_calls)
+        self.assertEqual(ref, ret)
+
+        ret = c.func()
+        self.assertEqual(2, c.num_calls)
+        self.assertEqual(ref, ret)
+
+    def test_cached_class(self):
+        # Same test as above, but wrap the class's function with the results
+        # cache. The first call should happen (and save the results), and the
+        # second call will load the data.
+
+        ref = 'Hello, World!'
+
+        c = self.C(ref)
+
+        filename = os.path.join(self.tmp_dir, 'test.pck')
+        ref_md5 = '7b72059332de561a5efef5b88b8bac39'
+        c.func = results_cache.cached_call(c.func,
+                                           cache_filename=filename,
+                                           expected_hash=ref_md5)
+        ret = c.func()
+        self.assertEqual(1, c.num_calls)
+        self.assertEqual(ref, ret)
+
+        ret = c.func()
+        self.assertEqual(1, c.num_calls)
+        self.assertEqual(ref, ret)
 
 if __name__ == '__main__':
     unittest.main()
