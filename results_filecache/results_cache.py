@@ -1,3 +1,38 @@
+"""
+
+A python decorator for caching the output of a long computation, conditioned on
+a matching md5 hash.
+
+This is most useful for scientific pipelines where you process some input data
+into an intermediate data structure, then do stuff on the result. Using a single
+decorator, this module stores the output of the processing step to a pickle file
+after the first time, and will load it each subsequent time.
+
+Basic example:
+>>> from functools import partial
+>>> cache_decorator = partial(
+...      cached_call, expected_hash='7ce738d6b23ecaf840773fb4e7999a0a')
+>>> @cache_decorator
+... def process(x):
+...     print('Computing stuff!')
+...     return x
+...
+>>> process([2, 4, 8])  # This will call process() # doctest:+ELLIPSIS
+Could not open file: ...
+Hashes did not match ...
+Computing stuff!
+[2, 4, 8]
+>>> process([2, 4, 8])  # This will load from cache.pck # doctest:+ELLIPSIS
+Loaded matching data from file (hash = ...)
+[2, 4, 8]
+>>> import os  # Cleanup doctest
+>>> os.remove('cache.pck')
+
+
+Author: Felix Duvallet
+"""
+
+
 import hashlib
 from functools import wraps
 
@@ -40,32 +75,28 @@ def _load_if_md5_matches(cache_filename, expected_hash):
 
     :param cache_filename: full path to file.
     :param expected_hash:
-    :return: data if file exists and md5 matches, otherwise None
+    :return: (data, hash): data is None if file doesn't exist or md5 doesn't
+    match.
     """
     actual_md5 = _compute_file_md5(cache_filename)
-    print('Actual hash for file {}: {}'.format(cache_filename, actual_md5))
 
     if expected_hash != actual_md5:
-        print('Hashes did not match.')
-        return None
+        return None, actual_md5
 
-    print('Hash is a match, loading file.')
     try:
         with open(cache_filename, 'rb') as f:
             data = pickle.load(f)
-            return data
+            return data, actual_md5
     except IOError as e:
         # NOTE: any IOErrors will have been caught by _compute_file_md5.
         print('Could not open file: {}'.format(e))
-        return None
+        return None, actual_md5
 
 
-def _save(data, cache_filename, verbose=False):
+def _save(data, cache_filename):
     try:
         with open(cache_filename, 'wb') as f:
             pickle.dump(data, f)
-            if verbose:
-                print('Object saved to {}.'.format(cache_filename))
         return True
     except IOError as e:
         print('Could not write cache: {}'.format(e))
@@ -91,20 +122,23 @@ def cached_call(function, cache_filename='cache.pck', expected_hash=None):
 
     @wraps(function)
     def load_or_compute(*args, **kwargs):
-        print('Checking if we already have data... Expected hash = {}'.format(expected_hash))
-
         # Try to load the data. This returns None if the file doesn't exist or
         # the hash does not match.
-        data = _load_if_md5_matches(cache_filename, expected_hash)
+        (data, actual_hash) = _load_if_md5_matches(
+            cache_filename, expected_hash)
 
         # Here, we have to call the data computation function, then save the
         # output.
         if not data:
-            print('Computing data')
+            print(('Hashes did not match (expected {}, got {}). Computing '
+                   'result and storing to file.').format(
+                expected_hash, actual_hash))
             data = function(*args, **kwargs)
-            print('Saving result')
 
-            _save(data, cache_filename, verbose=True)
+            _save(data, cache_filename)
+        else:
+            print('Loaded matching data from file (hash = {})'.format(
+                actual_hash))
 
         return data
 

@@ -36,17 +36,17 @@ class TestResultsCache(unittest.TestCase):
         self.assertEqual('', ret)
 
     def test_load_matches(self):
-        data = results_cache._load_if_md5_matches(self.filepath, self.ref_md5)
+        (data, _) = results_cache._load_if_md5_matches(self.filepath, self.ref_md5)
         self.assertIsNotNone(data)
         self.assertEqual('Hello, World!', data)
 
     def test_load_mismatch_hash(self):
-        data = results_cache._load_if_md5_matches(self.filepath, '0')
+        (data, _) = results_cache._load_if_md5_matches(self.filepath, '0')
         self.assertIsNone(data)
 
     def test_load_no_file(self):
         fpath = os.path.join(os.path.dirname(__file__), 'not_a_file.pck')
-        data = results_cache._load_if_md5_matches(fpath, self.ref_md5)
+        (data, _) = results_cache._load_if_md5_matches(fpath, self.ref_md5)
         self.assertIsNone(data)
 
     def test_save_good(self):

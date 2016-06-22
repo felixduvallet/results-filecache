@@ -11,6 +11,8 @@ expected_md5 = '89ae471d2783a5bdaca71cd91d2f3274'
 cache_big_task = partial(results_cache.cached_call,
                          cache_filename=filename,
                          expected_hash=expected_md5)
+
+
 @cache_big_task
 def big_task(x):
     print('Running a big task: {}'.format(x))
