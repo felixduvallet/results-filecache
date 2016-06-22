@@ -1,4 +1,4 @@
-import functools
+import sys
 import unittest
 import os
 import shutil
@@ -89,7 +89,10 @@ class TestResultsCache(unittest.TestCase):
         c = self.C(ref)
 
         filename = os.path.join(self.tmp_dir, 'test.pck')
+
         ref_md5 = '7b72059332de561a5efef5b88b8bac39'
+        if sys.version_info[0] >= 3:  # pickle3 results in different md5.
+            ref_md5 = 'fcb0b48798cea17c9bfd2634f87be359'
         c.func = results_cache.cached_call(c.func,
                                            cache_filename=filename,
                                            expected_hash=ref_md5)
