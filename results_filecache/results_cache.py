@@ -1,6 +1,11 @@
 import hashlib
 from functools import wraps
-import cPickle as pickle
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 
 
 def _compute_file_md5(filename, block_size=2 ** 20):
@@ -46,7 +51,7 @@ def _load_if_md5_matches(cache_filename, expected_hash):
 
     print('Hash is a match, loading file.')
     try:
-        with open(cache_filename, 'r') as f:
+        with open(cache_filename, 'rb') as f:
             data = pickle.load(f)
             return data
     except IOError as e:
