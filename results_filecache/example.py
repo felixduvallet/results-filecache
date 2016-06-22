@@ -38,7 +38,8 @@ def run_example():
     filename = 'longtask.pck'
     expected_md5 = '60945c2971bf4c5f03fe54525902afe1'
     # Here we re-assign the function.
-    call_long_task = results_cache.cached_call(call_long_task, filename, expected_md5)
+    call_long_task = results_cache.cached_call(
+        call_long_task, filename, expected_md5)
 
     # NOTE: The first time, the file will not exist, so we will call the
     # computation.
