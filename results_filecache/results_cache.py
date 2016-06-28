@@ -29,7 +29,8 @@ Loaded matching data from file (hash = ...)
 >>> os.remove('cache.pck')
 
 
-Author: Felix Duvallet
+Author: Felix Duvallet <felixd@gmail.com>
+
 """
 
 
@@ -40,7 +41,6 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-
 
 
 def _compute_file_md5(filename, block_size=2 ** 20):
@@ -136,6 +136,11 @@ def cached_call(function, cache_filename='cache.pck', expected_hash=None):
             data = function(*args, **kwargs)
 
             _save(data, cache_filename)
+            md5 = _compute_file_md5(cache_filename)
+
+            print('Saved result to file: {} [{}]'.format(
+                cache_filename, md5))
+
         else:
             print('Loaded matching data from file (hash = {})'.format(
                 actual_hash))
