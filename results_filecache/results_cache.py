@@ -59,7 +59,7 @@ def _compute_file_md5(filename, block_size=2 ** 20):
         with open(filename, 'rb') as f:
             while True:
                 data = f.read(block_size)
-                if data is None:
+                if not data:
                     break
                 md5.update(data)
             return md5.hexdigest()
