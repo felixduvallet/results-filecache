@@ -114,7 +114,7 @@ class TestResultsCache(unittest.TestCase):
 
         ref_md5 = '00b76b9486d97108ad39484ee341996e'
         if sys.version_info[0] >= 3:  # pickle3 results in different md5.
-            ref_md5 = 'TODO'
+            ref_md5 = '5de1c5f0a6338916f67d918697feeff1'
         c.func = results_cache.cached_call(c.func,
                                            cache_filename=filename,
                                            expected_hash=ref_md5)
