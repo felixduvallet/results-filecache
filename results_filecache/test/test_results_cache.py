@@ -17,14 +17,18 @@ class TestResultsCache(unittest.TestCase):
         shutil.rmtree(self.tmp_dir)
 
     class C(object):
-        # Helper class for wrapping func().
-        def __init__(self, ref):
+        # Helper class that just returns the data passed in to the constructor.
+        # It also counts the number of times 'func' was called, making it
+        # possible to know whether or not 'func' was called or the data was
+        # loaded from the cache file. To use it, wrap func() with cached_call
+        # and the expected hash.
+        def __init__(self, data):
             self.num_calls = 0
-            self.ref = ref
+            self.data = data
 
         def func(self):
             self.num_calls += 1
-            return self.ref
+            return self.data
 
     def test_compute_hash(self):
         ret = results_cache._compute_file_md5(self.filepath)
@@ -36,7 +40,8 @@ class TestResultsCache(unittest.TestCase):
         self.assertEqual('', ret)
 
     def test_load_matches(self):
-        (data, _) = results_cache._load_if_md5_matches(self.filepath, self.ref_md5)
+        (data, _) = results_cache._load_if_md5_matches(
+            self.filepath, self.ref_md5)
         self.assertIsNotNone(data)
         self.assertEqual('Hello, World!', data)
 
@@ -85,7 +90,6 @@ class TestResultsCache(unittest.TestCase):
         # second call will load the data.
 
         ref = 'Hello, World!'
-
         c = self.C(ref)
 
         filename = os.path.join(self.tmp_dir, 'test.pck')
