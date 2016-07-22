@@ -129,7 +129,7 @@ def cached_call(function, cache_filename='cache.pck', expected_hash=None):
 
         # Here, we have to call the data computation function, then save the
         # output.
-        if not data:
+        if data is None:
             print(('Hashes did not match (expected {}, got {}). Computing '
                    'result and storing to file.').format(
                 expected_hash, actual_hash))
