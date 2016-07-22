@@ -1,8 +1,6 @@
 from results_filecache import results_cache
 from functools import partial
 
-
-
 # The first method of caching the result of a computation (big_task) just
 # decorates the method directly. We used partial to select the filename and
 # expected hash arguments.
@@ -46,19 +44,19 @@ def run_example():
     # NOTE: The first time, the file will not exist, so we will call the
     # computation.
     ret = call_long_task(x, y)
-    print 'Result: ', ret
+    print('Result: ', ret)
 
     # The second time, the file exists *and* its md5sum matches, so the result
     # is loaded from the longtask.pkl file instead.
     ret = call_long_task(x, y)
-    print 'Result: ', ret
+    print('Result: ', ret)
 
     # Here big_task was directly decorated. The first call will perform the
     # computation. The second call will use the file.
     ret = big_task(x)
-    print 'Result: ', ret
+    print('Result: ', ret)
     ret = big_task(x)
-    print 'Result: ', ret
+    print('Result: ', ret)
 
     import os
     try:

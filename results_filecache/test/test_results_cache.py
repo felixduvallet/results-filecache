@@ -3,6 +3,7 @@ import unittest
 import os
 import shutil
 import tempfile
+import numpy as np
 
 from results_filecache import results_cache
 
@@ -17,14 +18,18 @@ class TestResultsCache(unittest.TestCase):
         shutil.rmtree(self.tmp_dir)
 
     class C(object):
-        # Helper class for wrapping func().
-        def __init__(self, ref):
+        # Helper class that just returns the data passed in to the constructor.
+        # It also counts the number of times 'func' was called, making it
+        # possible to know whether or not 'func' was called or the data was
+        # loaded from the cache file. To use it, wrap func() with cached_call
+        # and the expected hash.
+        def __init__(self, data):
             self.num_calls = 0
-            self.ref = ref
+            self.data = data
 
         def func(self):
             self.num_calls += 1
-            return self.ref
+            return self.data
 
     def test_compute_hash(self):
         ret = results_cache._compute_file_md5(self.filepath)
@@ -36,7 +41,8 @@ class TestResultsCache(unittest.TestCase):
         self.assertEqual('', ret)
 
     def test_load_matches(self):
-        (data, _) = results_cache._load_if_md5_matches(self.filepath, self.ref_md5)
+        (data, _) = results_cache._load_if_md5_matches(
+            self.filepath, self.ref_md5)
         self.assertIsNotNone(data)
         self.assertEqual('Hello, World!', data)
 
@@ -85,7 +91,6 @@ class TestResultsCache(unittest.TestCase):
         # second call will load the data.
 
         ref = 'Hello, World!'
-
         c = self.C(ref)
 
         filename = os.path.join(self.tmp_dir, 'test.pck')
@@ -103,6 +108,28 @@ class TestResultsCache(unittest.TestCase):
         ret = c.func()
         self.assertEqual(1, c.num_calls)
         self.assertEqual(ref, ret)
+
+    def test_numpy_caching(self):
+        # Numpy data exposes a bug where we checked for 'if not data'.
+        data = np.array([1, 2, 3])
+        c = self.C(data)
+
+        filename = os.path.join(self.tmp_dir, 'test.pck')
+
+        ref_md5 = '00b76b9486d97108ad39484ee341996e'
+        if sys.version_info[0] >= 3:  # pickle3 results in different md5.
+            ref_md5 = '5de1c5f0a6338916f67d918697feeff1'
+        c.func = results_cache.cached_call(c.func,
+                                           cache_filename=filename,
+                                           expected_hash=ref_md5)
+        ret = c.func()
+        self.assertEqual(1, c.num_calls)
+        np.testing.assert_array_equal(data, ret)
+
+        ret = c.func()  # This should return the cached data.
+        self.assertEqual(1, c.num_calls)
+        np.testing.assert_array_equal(data, ret)
+
 
 if __name__ == '__main__':
     unittest.main()
