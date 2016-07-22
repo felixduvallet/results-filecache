@@ -1,8 +1,6 @@
 from results_filecache import results_cache
 from functools import partial
 
-
-
 # The first method of caching the result of a computation (big_task) just
 # decorates the method directly. We used partial to select the filename and
 # expected hash arguments.
