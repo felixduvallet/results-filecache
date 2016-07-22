@@ -3,6 +3,7 @@ import unittest
 import os
 import shutil
 import tempfile
+import numpy as np
 
 from results_filecache import results_cache
 
@@ -107,6 +108,28 @@ class TestResultsCache(unittest.TestCase):
         ret = c.func()
         self.assertEqual(1, c.num_calls)
         self.assertEqual(ref, ret)
+
+    def test_numpy_caching(self):
+        # Numpy data exposes a bug where we checked for 'if not data'.
+        data = np.array([1, 2, 3])
+        c = self.C(data)
+
+        filename = os.path.join(self.tmp_dir, 'test.pck')
+
+        ref_md5 = '00b76b9486d97108ad39484ee341996e'
+        if sys.version_info[0] >= 3:  # pickle3 results in different md5.
+            ref_md5 = '5de1c5f0a6338916f67d918697feeff1'
+        c.func = results_cache.cached_call(c.func,
+                                           cache_filename=filename,
+                                           expected_hash=ref_md5)
+        ret = c.func()
+        self.assertEqual(1, c.num_calls)
+        np.testing.assert_array_equal(data, ret)
+
+        ret = c.func()  # This should return the cached data.
+        self.assertEqual(1, c.num_calls)
+        np.testing.assert_array_equal(data, ret)
+
 
 if __name__ == '__main__':
     unittest.main()
