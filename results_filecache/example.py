@@ -44,19 +44,19 @@ def run_example():
     # NOTE: The first time, the file will not exist, so we will call the
     # computation.
     ret = call_long_task(x, y)
-    print 'Result: ', ret
+    print('Result: ', ret)
 
     # The second time, the file exists *and* its md5sum matches, so the result
     # is loaded from the longtask.pkl file instead.
     ret = call_long_task(x, y)
-    print 'Result: ', ret
+    print('Result: ', ret)
 
     # Here big_task was directly decorated. The first call will perform the
     # computation. The second call will use the file.
     ret = big_task(x)
-    print 'Result: ', ret
+    print('Result: ', ret)
     ret = big_task(x)
-    print 'Result: ', ret
+    print('Result: ', ret)
 
     import os
     try:
