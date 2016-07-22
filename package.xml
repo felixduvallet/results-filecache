@@ -7,5 +7,6 @@
   <maintainer email="felixd@gmail.com">Felix Duvallet</maintainer>
   <author email="felixd@gmail.com">Felix Duvallet</author>
   <license>BSD</license>
+  <build_depend>python-numpy</build_depend>
   <buildtool_depend>catkin</buildtool_depend>
 </package>
